@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} Details - ShopEase Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4 mb-md-0">
+            <!-- Admin Sidebar -->
+            <div class="list-group">
+                <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a href="{{ url_for('admin.products') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-box me-2"></i>Products
+                </a>
+                <a href="{{ url_for('admin.orders') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-shopping-cart me-2"></i>Orders
+                </a>
+                <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users me-2"></i>Users
+                </a>
+                <a href="{{ url_for('products.index') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-home me-2"></i>Back to Store
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Order #{{ order.id }} Details</h2>
+                <a href="{{ url_for('admin.orders') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+            </div>
+            
+            <div class="row">
+                <!-- Order Summary Card -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Order ID:</span>
+                                <span>#{{ order.id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Date:</span>
+                                <span>{{ order.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Customer:</span>
+                                <span>{{ order.user.name }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Email:</span>
+                                <span>{{ order.user.email }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Payment Status:</span>
+                                <span class="badge {{ 'bg-success' if order.payment_status == 'Paid' else 'bg-danger' }}">
+                                    {{ order.payment_status }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Order Status:</span>
+                                <span class="badge 
+                                    {% if order.order_status == 'Pending' %}bg-warning
+                                    {% elif order.order_status == 'Shipped' %}bg-info
+                                    {% elif order.order_status == 'Delivered' %}bg-success
+                                    {% elif order.order_status == 'Cancelled' %}bg-danger
+                                    {% endif %}">
+                                    {{ order.order_status }}
+                                </span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Items:</span>
+                                <span>{{ order.items|length }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Total Amount:</strong>
+                                <strong>{{ order.total_amount|inr }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Status Update Card -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Update Order Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="update-status-form" action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                
+                                <div class="mb-4">
+                                    <label for="order-status" class="form-label">Status</label>
+                                    <select name="status" id="order-status" class="form-select">
+                                        <option value="Pending" {{ 'selected' if order.order_status == 'Pending' else '' }}>Pending</option>
+                                        <option value="Shipped" {{ 'selected' if order.order_status == 'Shipped' else '' }}>Shipped</option>
+                                        <option value="Delivered" {{ 'selected' if order.order_status == 'Delivered' else '' }}>Delivered</option>
+                                        <option value="Cancelled" {{ 'selected' if order.order_status == 'Cancelled' else '' }}>Cancelled</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="status-notes" class="form-label">Notes (Optional)</label>
+                                    <textarea class="form-control" id="status-notes" rows="3" placeholder="Add notes about this order status update"></textarea>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Update Status
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Items Card -->
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Items</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Unit Price</th>
+                                            <th>Quantity</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="{{ item.product.image_url }}" class="cart-item-img me-3" alt="{{ item.product.name }}">
+                                                        <div>
+                                                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                                                            <small class="text-muted">{{ item.product.category }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ item.price|inr }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ (item.price * item.quantity)|inr }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-active">
+                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                            <td><strong>{{ order.total_amount|inr }}</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customer Details Card -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Customer Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Customer Details</h6>
+                                    <p class="mb-1"><strong>Name:</strong> {{ order.user.name }}</p>
+                                    <p class="mb-1"><strong>Email:</strong> {{ order.user.email }}</p>
+                                    <p class="mb-3"><strong>Member Since:</strong> {{ order.user.created_at.strftime('%B %d, %Y') }}</p>
+                                    
+                                    <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-user me-2"></i>View Customer Profile
+                                    </a>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6>Shipping Address</h6>
+                                    <address>
+                                        {{ order.user.name }}<br>
+                                        123 Sample Street<br>
+                                        Anytown, State 12345<br>
+                                        United States<br>
+                                        <i class="fas fa-phone me-1"></i> (555) 555-5555
+                                    </address>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - ShopEase{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Login to ShopEase</h2>
+                    
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">{{ form.email.label }}</label>
+                            {{ form.email(class="form-control", id="email", placeholder="Enter your email") }}
+                            {% for error in form.email.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">{{ form.password.label }}</label>
+                            {{ form.password(class="form-control", id="password", placeholder="Enter your password") }}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.remember(class="form-check-input", id="remember") }}
+                            <label class="form-check-label" for="remember">{{ form.remember.label }}</label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Demo Account Information (only for demonstration purposes) -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Demo Accounts</h5>
+                    <div class="mb-2">
+                        <strong>Admin Account:</strong>
+                        <div>Email: admin@shopease.com</div>
+                        <div>Password: admin123</div>
+                    </div>
+                    <div>
+                        <strong>User Account:</strong>
+                        <div>Email: user@shopease.com</div>
+                        <div>Password: user123</div>
+                    </div>
+                    <div class="small text-muted mt-2">
+                        <i class="fas fa-info-circle"></i> Note: These credentials are for demonstration purposes only.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

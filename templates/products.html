@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - ShopEase{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('products.index') }}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Products</li>
+            {% if current_category %}
+                <li class="breadcrumb-item active" aria-current="page">{{ current_category }}</li>
+            {% endif %}
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Sidebar with Categories -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Categories</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('products.product_list') }}" class="list-group-item list-group-item-action {{ 'active' if not current_category else '' }}">
+                        All Products
+                    </a>
+                    {% for category in categories %}
+                        <a href="{{ url_for('products.product_list', category=category) }}" class="list-group-item list-group-item-action {{ 'active' if current_category == category else '' }}">
+                            {{ category }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Price Filter (not functional in this demo) -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Price Range</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="min-price" class="form-label">Min Price: ₹0</label>
+                        <input type="range" class="form-range" min="0" max="75000" step="750" id="min-price">
+                    </div>
+                    <div class="mb-3">
+                        <label for="max-price" class="form-label">Max Price: ₹75,000</label>
+                        <input type="range" class="form-range" min="0" max="75000" step="750" id="max-price" value="75000">
+                    </div>
+                    <button class="btn btn-outline-primary w-100">Apply Filter</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Listing -->
+        <div class="col-md-9">
+            <!-- Search Results Info -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    {% if search_term %}
+                        <h4>Search Results for: "{{ search_term }}"</h4>
+                    {% elif current_category %}
+                        <h4>Category: {{ current_category }}</h4>
+                    {% else %}
+                        <h4>All Products</h4>
+                    {% endif %}
+                    
+                    <p class="text-muted">{{ products|length }} products found</p>
+                </div>
+                
+                <!-- Sorting Options (not functional in this demo) -->
+                <div class="d-none d-md-block">
+                    <select class="form-select" id="sort-options">
+                        <option selected>Sort by: Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest First</option>
+                    </select>
+                </div>
+            </div>
+            
+            {% if products %}
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="card product-card h-100">
+                                <div class="position-relative">
+                                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                                    
+                                    <!-- Wishlist Icon -->
+                                    {% if current_user.is_authenticated %}
+                                        <button class="wishlist-icon toggle-wishlist bg-transparent border-0" 
+                                            data-product-id="{{ product.id }}" 
+                                            title="Add to Wishlist">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    {% endif %}
+                                    
+                                    <!-- Category Badge -->
+                                    <span class="badge bg-primary category-badge">{{ product.category }}</span>
+                                </div>
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text text-truncate">{{ product.description }}</p>
+                                    <p class="card-text price mt-auto">{{ product.price|inr }}</p>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="btn btn-outline-primary">View Details</a>
+                                        
+                                        {% if current_user.is_authenticated %}
+                                            <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                            </button>
+                                        {% else %}
+                                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Login to Buy
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination (not functional in this demo) -->
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                    <h3>No products found</h3>
+                    {% if search_term %}
+                        <p>We couldn't find any products matching "{{ search_term }}".</p>
+                        <a href="{{ url_for('products.product_list') }}" class="btn btn-primary">View All Products</a>
+                    {% elif current_category %}
+                        <p>No products available in this category yet.</p>
+                        <a href="{{ url_for('products.product_list') }}" class="btn btn-primary">View All Products</a>
+                    {% else %}
+                        <p>There are no products available at the moment.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+{% endblock %}

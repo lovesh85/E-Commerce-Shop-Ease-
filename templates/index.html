@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}ShopEase - Modern eCommerce Shopping{% endblock %}
+
+{% block content %}
+    <!-- Fullscreen Hero Section with Split Design -->
+    <section class="fullscreen-hero">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6 hero-content-col d-flex align-items-center">
+                    <div class="hero-content px-4 px-md-5 py-5">
+                        <h1 class="hero-title mb-4">Premium Shopping Experience</h1>
+                        <p class="hero-subtitle mb-4">Discover quality products curated for modern lifestyle. Excellence in every detail.</p>
+                        <div class="hero-actions">
+                            <a href="{{ url_for('products.product_list') }}" class="btn btn-lg btn-primary me-3">Explore Products</a>
+                            <a href="#trending" class="btn btn-lg btn-outline-secondary">Trending Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 hero-image-col p-0 d-none d-lg-block">
+                    <div class="hero-image-wrapper">
+                        <!-- Hero image is set in CSS background -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Products Slider -->
+    <section id="trending" class="py-5 section-trending">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-2">What's Trending</h6>
+                <h2 class="section-title display-6">Popular Right Now</h2>
+                <div class="section-line mx-auto my-3"></div>
+            </div>
+            
+            <div class="product-grid">
+                <div class="row">
+                    {% if featured_products %}
+                        {% for product in featured_products %}
+                            <div class="col-6 col-md-4 col-lg-3 mb-4">
+                                <div class="modern-card">
+                                    <div class="modern-card-image">
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                                        <div class="modern-card-actions">
+                                            <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="action-icon">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if current_user.is_authenticated %}
+                                                <button class="action-icon toggle-wishlist" data-product-id="{{ product.id }}">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                                <button class="action-icon add-to-cart" data-product-id="{{ product.id }}">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modern-card-body">
+                                        <div class="modern-card-category">{{ product.category }}</div>
+                                        <h3 class="modern-card-title">{{ product.name }}</h3>
+                                        <div class="modern-card-price">{{ product.price|inr }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center">
+                            <p>No trending products available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('products.product_list') }}" class="btn btn-outline-primary view-all-btn">
+                        View All Products <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newest Arrivals Section -->
+    <section class="py-5 section-newest bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-2">Fresh Drops</h6>
+                <h2 class="section-title display-6">Newest Arrivals</h2>
+                <div class="section-line mx-auto my-3"></div>
+            </div>
+            
+            <div class="product-grid">
+                <div class="row">
+                    {% if newest_products %}
+                        {% for product in newest_products %}
+                            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                                <div class="modern-card">
+                                    <div class="modern-card-image">
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                                        <div class="modern-card-actions">
+                                            <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="action-icon">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if current_user.is_authenticated %}
+                                                <button class="action-icon toggle-wishlist" data-product-id="{{ product.id }}">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                                <button class="action-icon add-to-cart" data-product-id="{{ product.id }}">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modern-card-body">
+                                        <div class="modern-card-category">{{ product.category }}</div>
+                                        <h3 class="modern-card-title">{{ product.name }}</h3>
+                                        <div class="modern-card-price">{{ product.price|inr }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center">
+                            <p>No new products available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories in horizontal display -->
+    <section class="py-5 section-categories">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-2">Collections</h6>
+                <h2 class="section-title display-6">Shop By Category</h2>
+                <div class="section-line mx-auto my-3"></div>
+            </div>
+            
+            <div class="category-slider">
+                <div class="row justify-content-center">
+                    {% if categories %}
+                        {% for category in categories %}
+                            <div class="col-4 col-md-3 col-lg-2 mb-4">
+                                <a href="{{ url_for('products.product_list', category=category) }}" class="category-item">
+                                    <div class="category-circle">
+                                        <i class="fa-solid 
+                                        {% if 'electronics' in category.lower() %}fa-microchip
+                                        {% elif 'clothing' in category.lower() or 'fashion' in category.lower() %}fa-shirt
+                                        {% elif 'book' in category.lower() %}fa-book
+                                        {% elif 'beauty' in category.lower() %}fa-spa
+                                        {% elif 'home' in category.lower() %}fa-home
+                                        {% elif 'toy' in category.lower() %}fa-gamepad
+                                        {% elif 'sport' in category.lower() %}fa-volleyball-ball
+                                        {% elif 'food' in category.lower() %}fa-utensils
+                                        {% else %}fa-tag{% endif %}"></i>
+                                    </div>
+                                    <h5 class="category-name">{{ category }}</h5>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default categories if none exist in database -->
+                        <div class="col-4 col-md-3 col-lg-2 mb-4">
+                            <a href="{{ url_for('products.product_list', category='Electronics') }}" class="category-item">
+                                <div class="category-circle">
+                                    <i class="fa-solid fa-microchip"></i>
+                                </div>
+                                <h5 class="category-name">Electronics</h5>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md-3 col-lg-2 mb-4">
+                            <a href="{{ url_for('products.product_list', category='Fashion') }}" class="category-item">
+                                <div class="category-circle">
+                                    <i class="fa-solid fa-shirt"></i>
+                                </div>
+                                <h5 class="category-name">Fashion</h5>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md-3 col-lg-2 mb-4">
+                            <a href="{{ url_for('products.product_list', category='Home') }}" class="category-item">
+                                <div class="category-circle">
+                                    <i class="fa-solid fa-home"></i>
+                                </div>
+                                <h5 class="category-name">Home</h5>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md-3 col-lg-2 mb-4">
+                            <a href="{{ url_for('products.product_list', category='Beauty') }}" class="category-item">
+                                <div class="category-circle">
+                                    <i class="fa-solid fa-spa"></i>
+                                </div>
+                                <h5 class="category-name">Beauty</h5>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products in Masonry Grid -->
+    <section class="py-5 section-featured bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-2">Curated Selection</h6>
+                <h2 class="section-title display-6">Featured Products</h2>
+                <div class="section-line mx-auto my-3"></div>
+            </div>
+            
+            <div class="masonry-grid">
+                <div class="row g-4">
+                    {% if featured_products %}
+                        {% for product in featured_products[:3] %}
+                            <div class="col-md-4">
+                                <div class="masonry-item">
+                                    <div class="masonry-image">
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                                    </div>
+                                    <div class="masonry-content">
+                                        <h3>{{ product.name }}</h3>
+                                        <p>{{ product.price|inr }}</p>
+                                        <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="btn btn-sm btn-outline-light">Shop Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center">
+                            <p>No featured products available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Products Sections -->
+    {% if category_products %}
+        {% for category, products in category_products.items() %}
+            {% if products %}
+            <section class="py-5 section-category-products {% if loop.index is divisibleby(2) %}bg-light{% endif %}">
+                <div class="container">
+                    <div class="section-header d-flex justify-content-between align-items-center mb-5">
+                        <div>
+                            <h6 class="text-primary text-uppercase fw-bold mb-2">Shop Now</h6>
+                            <h2 class="section-title display-6">{{ category }}</h2>
+                        </div>
+                        <a href="{{ url_for('products.product_list', category=category) }}" class="btn btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="product-grid">
+                        <div class="row">
+                            {% for product in products %}
+                                <div class="col-6 col-md-4 col-lg-3 mb-4">
+                                    <div class="modern-card">
+                                        <div class="modern-card-image">
+                                            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                                            <div class="modern-card-actions">
+                                                <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="action-icon">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if current_user.is_authenticated %}
+                                                    <button class="action-icon toggle-wishlist" data-product-id="{{ product.id }}">
+                                                        <i class="fas fa-heart"></i>
+                                                    </button>
+                                                    <button class="action-icon add-to-cart" data-product-id="{{ product.id }}">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="modern-card-body">
+                                            <div class="modern-card-category">{{ product.category }}</div>
+                                            <h3 class="modern-card-title">{{ product.name }}</h3>
+                                            <div class="modern-card-price">{{ product.price|inr }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Value Propositions in Modern Style -->
+    <section class="py-5 section-values">
+        <div class="container">
+            <div class="values-wrapper">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="value-item">
+                            <div class="value-icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <div class="value-content">
+                                <h4>Free Shipping</h4>
+                                <p>On orders over ₹3,750</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="value-item">
+                            <div class="value-icon">
+                                <i class="fas fa-undo"></i>
+                            </div>
+                            <div class="value-content">
+                                <h4>Easy Returns</h4>
+                                <p>30-day return policy</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="value-item">
+                            <div class="value-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="value-content">
+                                <h4>Secure Checkout</h4>
+                                <p>Protected payments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="value-item">
+                            <div class="value-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="value-content">
+                                <h4>24/7 Support</h4>
+                                <p>Customer assistance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter with Minimal Design -->
+    <section class="py-5 section-newsletter">
+        <div class="container">
+            <div class="newsletter-wrapper text-center">
+                <h2 class="mb-4">Join Our Newsletter</h2>
+                <p class="mb-4">Subscribe to get special offers, free giveaways, and updates on new products</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <form class="newsletter-form">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                                <button class="btn btn-primary" type="submit">Subscribe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+{% endblock %}
